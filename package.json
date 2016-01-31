@@ -1,0 +1,12 @@
+{
+  "name": "ChatRoom",
+  "version": "0.0.0",
+  "description": "real time chat",
+  "dependencies": {
+    "express": "^4.14.4",
+    "jade": "^1.11.0",
+    "node-uuid": "^1.4.7",
+    "socket.io": "^1.4.5"
+  },
+  "author": "Daniel"
+}
