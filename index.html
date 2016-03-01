@@ -12,27 +12,52 @@
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
       .chatPage { display: none;}
+      .u { background :red; min-height:100% ;height:100%;}
+      .chatArea {background : #888; min-height:100%;height:100%; overflow:auto;}
+      .fill {min-height:100%; height:70%; background:white;}
+      html,body {height:100%; overflow:hidden;padding:0;margin:0;}
     </style>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
   </head>
   <body>
     <!-- <ul id="messages"></ul> -->
     <!-- //////////  my code ////////////////-->
-    <ul class="pages">
-      <li class="chatPage"> Chat Page Number of Users: <div id="numUsers">0 </div>
-        <ul id="messages"></ul>
-        <form id="sendMessage" action="">
-          <input id="m" autocomplete="off" /> <button>Send</button>
-        </form>
-      </li>
-      <li class="loginPage"> Login Page 
-        <form id="enterUserName" action="">
-          <input id="userName" autocomplete="off"/>
-       <!--    <input type="submit" value="Enter"> -->
-        </form>
-       
+    <div class="container-fluid fill">
+      <ul class="pages fill">
+        <li class="chatPage fill"> Chatroom 
+          <div>Number of Users: <span id="numUsers">0 </span></div>
+          <div id="me"></div>
+          <!-- <ul id="socketid"></ul> -->
+          <div class="row fill">
+            <div class="col-md-10 fill">
+              <div class="chatArea">
+                <ul id="messages"></ul>
+              </div>
+            </div>
+            <div class="col-md-2 fill">
+              <div class="u">
+                <ul id="users">Users</ul>
+              </div>
+            </div>
+          </div>
+          <form id="sendMessage" action="">
+            <input id="m" autocomplete="off" /> <button>Send</button>
+          </form>
+            <!-- </div> -->
+        </li>
 
-      </li>
-    </ul>
+      <!-- <div class="container-fluid"> -->
+        <li class="loginPage"> Login Page 
+          <form id="enterUserName" action="">
+            <input id="userName" autocomplete="off"/>
+         <!--    <input type="submit" value="Enter"> -->
+          </form>
+        </li>
+      <!-- </div> -->
+      </ul>
+    </div>
     <!-- ///////////////////////////////////////// -->
   <!--   <ul class="pages">
       <li class="chat page">
@@ -49,21 +74,24 @@
       </li>
     </ul>
     -->
+
     <script src="/socket.io/socket.io.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+
 <script>
   var socket = io();
   // $('.chatPage').hide();
   var $userName = $('#userName');
-  var userName;
+  var userName = 'default';
   var $numUsers = $('#numUsers');
-
+  var $messages = $('#messages');
   $('#sendMessage').submit(function(e){
     var $inputMessage = $('#m');
     var message = $inputMessage.val();
     socket.emit('chat message', {message : message, user_name : userName});
-    $('#messages').append($('<li>').text('Me: ' + message));
+    $messages.append($('<li>').text('Me: ' + message));
     $('#m').val('');
+    $('.chatArea').scrollTop($('.chatArea')[0].scrollHeight);
     e.preventDefault();
   });
 
@@ -71,6 +99,8 @@
     $('.loginPage').fadeOut();
     $('.chatPage').fadeIn();
     userName = $userName.val();
+    $('#me').text(userName);
+    $messages.append($('<li>').text('You have entered the chatroom'));
     socket.emit('new user', userName);
     e.preventDefault();
   });
@@ -83,21 +113,34 @@
   // });
 
   socket.on('chat message', function(msg) {
-    $('#messages').append($('<li>').text(msg.user_name + ': ' + msg.m));
+    $messages.append($('<li>').text(msg.user_name + ': ' + msg.m));
+    $('.chatArea').scrollTop($('.chatArea')[0].scrollHeight);
   })
 
   socket.on('disconnect', function(msg) {
-    $('#messages').append($('<li>').text(msg.user_name + ' disconnected'));
+    $messages.append($('<li>').text(msg.user_name + ' disconnected'));
     $numUsers.text(msg.num_users);
+    $('li').filter(function() {return $.text([this]) == msg.user_name;}).remove();
   })
 
   socket.on('new user', function(msg) {
-    if (userName != msg.user_name)
-      $('#messages').append($('<li>').text(msg.user_name + ' joined the chatroom'));
-    else  
-      $('#messages').append($('<li>').text('You have entered the chatroom'));
+    $messages.append($('<li>').text(msg.user_name + ' joined the chatroom'));
     $numUsers.text(msg.num_users);
+    $('#users').append($('<li>').text(msg.user_name));
   })
+
+  socket.on('initialize', function(msg) {
+    $numUsers.text(msg.num_users);
+    // $('#socketid').text('hii ' + socket.io.engine.id);
+    //add all user names to list
+    for (var person in msg.user_list) {
+      //avoid adding your own nickname, can make this easier by disallowing duplicate usernames
+      // if (msg.user_list[person].uid != '/#'+socket.io.engine.id) 
+      if (msg.user_list[person].nickName != userName)
+        $('#users').append($('<li>').text(msg.user_list[person].nickName));
+    }
+  })
+
 </script>
   </body>
 </html>

@@ -24,20 +24,34 @@ app.get('/', function(req, res){
 // app.use(express.static(__dirname + '/index.html'));
 
 var numUsers = 0;
+
+//stores sockets (added username property to socket)
 var allUsers = [];
+
+//stores person object which has username and socket.id
+var userList = [];
 io.on('connection', function(socket){
 	numUsers += 1;
 
 	socket.userName = 'default';
 	allUsers.push(socket);
-	console.log('a user connected');
 
+	var person = Object();
+	person.nickName = 'default';
+	person.uid = socket.id;
+	userList.push(person);
+	console.log('a user connected, id: '+socket.id);
+
+	//if people are sitting at login it will count them towards numUsers, if they were at
+	//login at the same time
+	io.to(socket.id).emit('initialize', {num_users : numUsers, user_list : userList});
 	socket.on('disconnect', function(){
 		numUsers -= 1;
 	    var i = allUsers.indexOf(socket);
 	    var user = allUsers[i].userName;
 	    console.log(user +' disconnected');
 	    allUsers.splice(i,1);
+	    userList.splice(i,1);
 	    io.emit('disconnect', {num_users : numUsers, user_name : user});
 	});
 
@@ -51,7 +65,8 @@ io.on('connection', function(socket){
  		console.log(msg + ' joined the chatroom');
  		var i = allUsers.indexOf(socket);
  		allUsers[i].userName = msg; 
- 		io.emit('new user', {num_users : numUsers, user_name : msg });
+ 		userList[i].nickName = msg;
+ 		socket.broadcast.emit('new user', {num_users : numUsers, user_name : msg });
  	});
 });
 
