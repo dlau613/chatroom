@@ -17,10 +17,15 @@ var http = require('http').createServer(app);
 console.log("aaaaaaaaaa");
 var io = require('socket.io')(http);
 
-app.listen(port, '0.0.0.0');
+// app.listen(port, '0.0.0.0');
+// http.listen(3000);
+http.listen(port, function(){
+  console.log('listening on *:3000');
+});
 // app.listen(port, '0.0.0.0', function(err) {
 //   console.log("Started listening on %s", app.url);
 // });
+
 console.log("bbbbbbbbbbbb");
 app.get('/', function(req, res){
   // res.send('<h1>Hello world</h1>');
@@ -79,9 +84,9 @@ io.on('connection', function(socket){
 
 
 
-http.listen(3000, function(){
-  console.log('listening on *:3000');
-});
+// http.listen(3000, function(){
+//   console.log('listening on *:3000');
+// });
 
 
 
