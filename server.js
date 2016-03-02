@@ -16,6 +16,7 @@ var app = express();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 
+app.listen(port, '0.0.0.0');
 // app.listen(port, '0.0.0.0', function(err) {
 //   console.log("Started listening on %s", app.url);
 // });
