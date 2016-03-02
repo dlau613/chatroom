@@ -92,7 +92,8 @@
     $messages.append($('<li>').text('Me: ' + message));
     $('#m').val('');
     $('.chatArea').scrollTop($('.chatArea')[0].scrollHeight);
-    e.preventDefault();
+    // e.preventDefault();
+    return false;
   });
 
   $('#enterUserName').submit(function(e) {
@@ -102,7 +103,8 @@
     $('#me').text(userName);
     $messages.append($('<li>').text('You have entered the chatroom'));
     socket.emit('new user', userName);
-    e.preventDefault();
+    // e.preventDefault();
+    return false;
   });
 
 
