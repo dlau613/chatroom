@@ -14,7 +14,7 @@ var port = process.env.PORT || 3000;
 var express = require('express');
 var app = express();
 var http = require('http').createServer(app);
-
+console.log("zzzzzz");
 var io = require('socket.io')(http);
 
 app.listen(port, '0.0.0.0');
