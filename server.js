@@ -14,6 +14,7 @@ var port = process.env.PORT || 3000;
 var express = require('express');
 var app = express();
 var http = require('http').createServer(app);
+
 var io = require('socket.io')(http);
 
 app.listen(port, '0.0.0.0');
@@ -28,8 +29,6 @@ app.get('/', function(req, res){
 
 // app.use(express.static(__dirname + '/index.html'));
 
-io.set('transports', ['xhr-polling']);
-io.set('polling duration',10);
 var numUsers = 0;
 
 //stores sockets (added username property to socket)
