@@ -28,6 +28,8 @@ app.get('/', function(req, res){
 
 // app.use(express.static(__dirname + '/index.html'));
 
+io.set('transports', ['xhr-polling']);
+io.set('polling duration',10);
 var numUsers = 0;
 
 //stores sockets (added username property to socket)
