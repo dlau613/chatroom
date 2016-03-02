@@ -14,18 +14,19 @@ var port = process.env.PORT || 3000;
 var express = require('express');
 var app = express();
 var http = require('http').createServer(app);
-console.log("zzzzzz");
+console.log("aaaaaaaaaa");
 var io = require('socket.io')(http);
 
 app.listen(port, '0.0.0.0');
 // app.listen(port, '0.0.0.0', function(err) {
 //   console.log("Started listening on %s", app.url);
 // });
-
+console.log("bbbbbbbbbbbb");
 app.get('/', function(req, res){
   // res.send('<h1>Hello world</h1>');
   res.sendFile(__dirname + '/index.html');
 });
+console.log("cccccccccccc");
 
 // app.use(express.static(__dirname + '/index.html'));
 
