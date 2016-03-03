@@ -5,6 +5,7 @@
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font: 13px Helvetica, Arial; }
+      .red {background:red;}
       #sendMessage { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
       #sendMessage input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
       #sendMessage button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
@@ -16,6 +17,7 @@
       .chatArea {background : #888; min-height:100%;height:100%; overflow:auto;}
       .fill {min-height:100%; height:70%; background:white;}
       html,body {height:100%; overflow:hidden;padding:0;margin:0;}
+      .test {display:inline-block;background:green;}
     </style>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
@@ -27,7 +29,7 @@
     <!-- <ul id="messages"></ul> -->
     <!-- //////////  my code ////////////////-->
     <div class="container-fluid fill">
-      <ul class="pages fill">
+      <ul class="pages fill list-unstyled">
         <li class="chatPage fill"> Chatroom 
           <div>Number of Users: <span id="numUsers">0 </span></div>
           <div id="me"></div>
@@ -45,18 +47,20 @@
             </div>
           </div>
           <form id="sendMessage" action="">
-            <input id="m" autocomplete="off" /> <button>Send</button>
+            <input id="m" autocomplete="off"/> <button>Send</button>
           </form>
             <!-- </div> -->
         </li>
 
       <!-- <div class="container-fluid"> -->
-        <li class="loginPage"> Login Page 
-          <form id="enterUserName" action="">
-            <input id="userName" autocomplete="off"/>
-         <!--    <input type="submit" value="Enter"> -->
-          </form>
-        </li>
+        <div class="jumbotron text-center">
+          <li class="loginPage"> Login Page 
+            <form id="enterUserName" action="">
+              <input id="userName" autocomplete="off" autofocus/>
+           <!--    <input type="submit" value="Enter"> -->
+            </form>
+          </li>
+        </div>
       <!-- </div> -->
       </ul>
     </div>
@@ -90,11 +94,19 @@
   var $numUsers = $('#numUsers');
   var $messages = $('#messages');
   $('#sendMessage').submit(function(e){
-    $('#me').text(socket.io.engine.id);
     var $inputMessage = $('#m');
     var message = $inputMessage.val();
     socket.emit('chat message', {message : message, user_name : userName});
-    $messages.append($('<li>').text('Me: ' + message));
+    // $messages.append($('<li>').attr('class','text-right').append(
+    //   $('<div>').attr('class','red')).append(
+    //   message));
+    $messages.append($('<li>').append(
+      $('<div class="text-right">').append(
+        $('<p class="test">').append(
+        message))));
+    // $messages.append($('<li>').attr('class','text-right red').append(
+    //   message));
+
     $('#m').val('');
     $('.chatArea').scrollTop($('.chatArea')[0].scrollHeight);
     e.preventDefault();
@@ -107,6 +119,7 @@
     userName = $userName.val();
     $('#me').text(userName);
     $messages.append($('<li>').text('You have entered the chatroom'));
+    $('#m').focus();
     socket.emit('new user', userName);
     e.preventDefault();
     // return false;
