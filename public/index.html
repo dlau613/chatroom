@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <!-- put style.css before bootstrap cdn -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  </head>
+  <body>
+    <!-- //////////  my code ////////////////-->
+    <div class="container-fluid fill">
+      <ul class="pages fill list-unstyled">
+        <li class="chatPage fill"> Chatroom 
+          <div>Number of Users: <span id="numUsers">0 </span></div>
+          <div id="me"></div>
+          <!-- <ul id="socketid"></ul> -->
+          <div class="row fill">
+            <div class="col-md-10 fill">
+              <div class="chatArea" id="messages">
+                <!-- either seems to work -->
+                <!-- <ul id="messages"></ul> -->
+                <!-- <div id="messages"></div> -->
+              </div>
+            </div>
+            <div class="col-md-2 fill">
+              <div class="u">
+                <ul id="users">Users</ul>
+              </div>
+            </div>
+          </div>
+          <form id="sendMessage" action="">
+            <input id="m" autocomplete="off"/> <button>Send</button>
+          </form>
+            <!-- </div> -->
+        </li>
+
+      <!-- <div class="container-fluid"> -->
+        <div class="jumbotron text-center">
+          <li class="loginPage"> Login Page 
+            <form id="enterUserName" action="">
+              <input id="userName" autocomplete="off" autofocus/>
+           <!--    <input type="submit" value="Enter"> -->
+            </form>
+          </li>
+        </div>
+      <!-- </div> -->
+      </ul>
+    </div>
+    <!-- ///////////////////////////////////////// -->
+  <!--   <ul class="pages">
+      <li class="chat page">
+        <div class="chatArea">
+          <ul class="messages"></ul>
+        </div>
+        <input class="inputMessage" placeholder="Type here..."/>
+      </li>
+      <li class="login page">
+        <div class="form">
+          <h3 class="title">What's your nickname?</h3>
+          <input class="usernameInput" type="text" maxlength="14" />
+        </div>
+      </li>
+    </ul>
+    -->
+
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+<script>
+  // var socket = io.connect('https://floating-brushlands-72677.herokuapp.com:80?id=2');
+  // var socket = io.connect("https://floating-brushlands-72677.herokuapp.com:80/");
+  // var socket = io.connect('/');
+  // var socket = io('https://floating-brushlands-72677.herokuapp.com:80/');
+  var socket = io.connect();
+  // $('.chatPage').hide();
+  var $userName = $('#userName');
+  var userName = 'default';
+  var $numUsers = $('#numUsers');
+  var $messages = $('#messages');
+  $('#sendMessage').submit(function(e){
+    var $inputMessage = $('#m');
+    var message = $inputMessage.val();
+    socket.emit('chat message', {message : message, user_name : userName});
+    
+    // $messages.append($('<li>').append(
+    //   $('<div class="text-right bubble-container">').append(
+    //     $('<p class="bubble">').append(
+    //     message))));
+  //do i want the extra li element
+    $messages.append(
+      $('<div class="text-right bubble-container">').append(
+        $('<div class="bubble">').append(
+        message)));
+  // $messages.append(
+  //     $('<div class="text-right bubble-container">').append(
+  //       // $('<div class="bubble">').append(
+  //       message));
+
+    $('#m').val('');
+    $('.chatArea').scrollTop($('.chatArea')[0].scrollHeight);
+    e.preventDefault();
+  });
+
+  $('#enterUserName').submit(function(e) {
+    $('.loginPage').fadeOut();
+    $('.chatPage').fadeIn();
+    userName = $userName.val();
+    $('#me').text(userName);
+    $messages.append($('<li>').text('You have entered the chatroom'));
+    // $messages.append($('<div class="bubble">').text('You have entered the chatroom'));
+    $('#m').focus();
+    socket.emit('new user', userName);
+    e.preventDefault();
+  });
+
+
+  socket.on('chat message', function(msg) {
+    // $messages.append($('<li>').text(msg.user_name + ': ' + msg.m));
+    $messages.append(
+      $('<div class="text-left bubble-container">').append(
+        $('<div class="bubble left-bubble">').append(
+        msg.user_name + ': ' + msg.m)));
+    $('.chatArea').scrollTop($('.chatArea')[0].scrollHeight);
+  })
+
+  socket.on('disconnect', function(msg) {
+    $messages.append($('<li>').text(msg.user_name + ' disconnected'));
+    $numUsers.text(msg.num_users);
+    $('li').filter(function() {return $.text([this]) == msg.user_name;}).remove();
+  })
+
+  socket.on('new user', function(msg) {
+    $messages.append($('<li>').text(msg.user_name + ' joined the chatroom'));
+    $numUsers.text(msg.num_users);
+    $('#users').append($('<li>').text(msg.user_name));
+  })
+
+  socket.on('initialize', function(msg) {
+    $numUsers.text(msg.num_users);
+    // $('#socketid').text('hii ' + socket.io.engine.id);
+    //add all user names to list
+    for (var person in msg.user_list) {
+      //avoid adding your own nickname, can make this easier by disallowing duplicate usernames
+      // if (msg.user_list[person].uid != '/#'+socket.io.engine.id) 
+      if (msg.user_list[person].nickName != userName)
+        $('#users').append($('<li>').text(msg.user_list[person].nickName));
+    }
+  })
+
+</script>
+  </body>
+</html>

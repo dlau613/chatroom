@@ -21,11 +21,13 @@ var io = require('socket.io')(http);
 //   console.log("Started listening on %s", app.url);
 // });
 
-app.get('/', function(req, res){
-  // res.send('<h1>Hello world</h1>');
-  res.sendFile(__dirname + '/index.html');
-});
 
+// app.get('/', function(req, res){
+//   // res.send('<h1>Hello world</h1>');
+
+//   res.sendFile(__dirname + '/index.html');
+// });
+app.use(express.static(__dirname +'/public'));
 // app.use(express.static(__dirname + '/index.html'));
 
 var numUsers = 0;
@@ -50,6 +52,7 @@ io.on('connection', function(socket){
 	//if people are sitting at login it will count them towards numUsers, if they were at
 	//login at the same time
 	io.to(socket.id).emit('initialize', {num_users : numUsers, user_list : userList});
+	
 	socket.on('disconnect', function(){
 		numUsers -= 1;
 	    var i = allUsers.indexOf(socket);
