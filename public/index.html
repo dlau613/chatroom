@@ -15,36 +15,31 @@
           <div>Number of Users: <span id="numUsers">0 </span></div>
           <div id="me"></div>
           <!-- <ul id="socketid"></ul> -->
+          <div class="container-fluid fill">
           <div class="row fill">
             <div class="col-md-10 fill">
-              <div class="chatArea" id="messages">
-                <!-- either seems to work -->
-                <!-- <ul id="messages"></ul> -->
-                <!-- <div id="messages"></div> -->
+              <div class="chatArea fill">
+                <div id="messages"> </div>
               </div>
             </div>
             <div class="col-md-2 fill">
-              <div class="u">
+              <div class="userArea">
                 <ul id="users">Users</ul>
               </div>
             </div>
+            <form id="sendMessage" action="">
+              <input id="m" autocomplete="off"/> <button>Send</button>
+            </form>
           </div>
-          <form id="sendMessage" action="">
-            <input id="m" autocomplete="off"/> <button>Send</button>
-          </form>
+          </div>
             <!-- </div> -->
         </li>
-
-      <!-- <div class="container-fluid"> -->
-        <div class="jumbotron text-center">
-          <li class="loginPage"> Login Page 
-            <form id="enterUserName" action="">
-              <input id="userName" autocomplete="off" autofocus/>
-           <!--    <input type="submit" value="Enter"> -->
-            </form>
-          </li>
-        </div>
-      <!-- </div> -->
+        <li class="jumbotron text-center loginPage"> Login Page 
+          <form id="enterUserName" action="">
+            <input id="userName" autocomplete="off" autofocus/>
+         <!--    <input type="submit" value="Enter"> -->
+          </form>
+        </li>
       </ul>
     </div>
     <!-- ///////////////////////////////////////// -->
@@ -82,25 +77,24 @@
     var $inputMessage = $('#m');
     var message = $inputMessage.val();
     socket.emit('chat message', {message : message, user_name : userName});
-    
-    // $messages.append($('<li>').append(
-    //   $('<div class="text-right bubble-container">').append(
-    //     $('<p class="bubble">').append(
-    //     message))));
-  //do i want the extra li element
-    $messages.append(
-      $('<div class="text-right bubble-container">').append(
-        $('<div class="bubble">').append(
-        message)));
-  // $messages.append(
-  //     $('<div class="text-right bubble-container">').append(
-  //       // $('<div class="bubble">').append(
-  //       message));
-
+  
+    if ($messages.children().last().hasClass("r-bubble-container")) {
+      $('.r-bubble-container:last').append(
+        $('<div class="r-bubble">').append(
+          message)).append('<br/>'); 
+    }
+    else {
+      $messages.append(
+        $('<div class="r-bubble-container">').append(
+          $('<div class="r-bubble">').append(
+            message)).append('<br/>'));
+    }
     $('#m').val('');
     $('.chatArea').scrollTop($('.chatArea')[0].scrollHeight);
     e.preventDefault();
   });
+  //if the last child of messages is a right bubble container add to it
+  //if its a left bubble container then add a new right buble container
 
   $('#enterUserName').submit(function(e) {
     $('.loginPage').fadeOut();
@@ -116,11 +110,21 @@
 
 
   socket.on('chat message', function(msg) {
-    // $messages.append($('<li>').text(msg.user_name + ': ' + msg.m));
-    $messages.append(
-      $('<div class="text-left bubble-container">').append(
-        $('<div class="bubble left-bubble">').append(
-        msg.user_name + ': ' + msg.m)));
+    if ($messages.children().last().hasClass("l-bubble-container")) {
+      $('.l-bubble-container:last').append(
+        $('<div class="l-bubble">').append(
+          msg.user_name +': ' + msg.m)).append('<br/>'); 
+    }
+    else {
+      $messages.append(
+        $('<div class="l-bubble-container">').append(
+          $('<div class="l-bubble">').append(
+            msg.user_name + ': ' + msg.m)).append('<br/>'));
+    }
+    // $messages.append(
+    //   $('<div class="text-left bubble-container">').append(
+    //     $('<div class="bubble left-bubble">').append(
+    //     msg.user_name + ': ' + msg.m)));
     $('.chatArea').scrollTop($('.chatArea')[0].scrollHeight);
   })
 
