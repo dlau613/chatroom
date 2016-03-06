@@ -16,21 +16,27 @@
           <div id="me"></div>
           <!-- <ul id="socketid"></ul> -->
           <div class="container-fluid fill">
-          <div class="row fill">
-            <div class="col-md-10 fill">
-              <div class="chatArea fill">
-                <div id="messages"> </div>
+            <div class="row temp" style="height:60%">
+              <div class="col-md-10 temp2   fill">
+                <div class="chatArea fill">
+                  <div id="messages"> </div>
+                </div>
+              </div>
+              <div class="col-md-2 temp2 fill">
+                <div class="userArea">
+                  <ul id="users">Users</ul>
+                </div>
               </div>
             </div>
-            <div class="col-md-2 fill">
-              <div class="userArea">
-                <ul id="users">Users</ul>
+            <div class="row temp">
+              <div class="col-md-10">
+              <form id="sendMessage" action="">
+                <input id="m" autocomplete="off"/> <button>Send</button>
+              </form>
               </div>
+              <!-- <div class="col-md-2"> -->
+              <!-- </div> -->
             </div>
-            <form id="sendMessage" action="">
-              <input id="m" autocomplete="off"/> <button>Send</button>
-            </form>
-          </div>
           </div>
             <!-- </div> -->
         </li>
@@ -68,7 +74,6 @@
   // var socket = io.connect('/');
   // var socket = io('https://floating-brushlands-72677.herokuapp.com:80/');
   var socket = io.connect();
-  // $('.chatPage').hide();
   var $userName = $('#userName');
   var userName = 'default';
   var $numUsers = $('#numUsers');
@@ -93,8 +98,6 @@
     $('.chatArea').scrollTop($('.chatArea')[0].scrollHeight);
     e.preventDefault();
   });
-  //if the last child of messages is a right bubble container add to it
-  //if its a left bubble container then add a new right buble container
 
   $('#enterUserName').submit(function(e) {
     $('.loginPage').fadeOut();
@@ -121,10 +124,6 @@
           $('<div class="l-bubble">').append(
             msg.user_name + ': ' + msg.m)).append('<br/>'));
     }
-    // $messages.append(
-    //   $('<div class="text-left bubble-container">').append(
-    //     $('<div class="bubble left-bubble">').append(
-    //     msg.user_name + ': ' + msg.m)));
     $('.chatArea').scrollTop($('.chatArea')[0].scrollHeight);
   })
 
