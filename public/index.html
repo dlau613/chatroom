@@ -89,8 +89,6 @@
       var first_space = sliced.indexOf(" ");
       recip = sliced.slice(0,first_space);
       message = sliced.slice(first_space+1,sliced.size);
-      alert('a'+recip+'a');
-      alert('a'+message+'a');
     }
     socket.emit('chat message', {message : message, user_name : userName, recipient : recip});
 
