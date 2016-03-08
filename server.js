@@ -1,3 +1,6 @@
+
+
+
 //load modules
 // var express = require("express");
 // var app = express();
@@ -36,6 +39,7 @@ var numUsers = 0;
 var allUsers = [];
 
 //stores person object which has username and socket.id
+//can pass this one as a parameter
 var userList = [];
 io.on('connection', function(socket){
 	numUsers += 1;
@@ -45,7 +49,7 @@ io.on('connection', function(socket){
 
 	var person = Object();
 	person.nickName = 'default';
-	person.uid = socket.id;
+	person.sid = socket.id;
 	userList.push(person);
 	console.log('a user connected, id: '+socket.id);
 
@@ -64,8 +68,18 @@ io.on('connection', function(socket){
 	});
 
 	socket.on('chat message', function(msg){
-    	console.log(msg.user_name + ': ' + msg.message);
-    	socket.broadcast.emit('chat message', { m : msg.message, user_name : msg.user_name} );
+    	console.log(msg.user_name + ' to ' + msg.recipient + ': ' + msg.message);
+    	if (msg.recipient === "all") {
+    		socket.broadcast.emit('chat message', { m : msg.message, user_name : msg.user_name} );
+ 		}
+ 		else {
+ 			var recipient_id = username_to_id(msg.recipient);
+ 			if (recipient_id != -1) {
+ 				io.to(recipient_id).emit('chat message', {m : msg.message, user_name : msg.user_name} );
+ 			}
+ 			else 
+ 				console.log("recipient does not exist");
+ 		}
  	});
 
 	//once the user enters a user name send it and the new number of users to everyone
@@ -89,3 +103,10 @@ http.listen(port, function(){
 
 
 
+function username_to_id(username) {
+	for (var i=0; i < userList.length; ++i) {
+		if (userList[i].nickName === username)
+			return userList[i].sid;
+	}
+	return -1;
+}

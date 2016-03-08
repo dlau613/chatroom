@@ -75,14 +75,25 @@
   // var socket = io('https://floating-brushlands-72677.herokuapp.com:80/');
   var socket = io.connect();
   var $userName = $('#userName');
-  var userName = 'default';
+  var userName = "default";
   var $numUsers = $('#numUsers');
   var $messages = $('#messages');
+
   $('#sendMessage').submit(function(e){
     var $inputMessage = $('#m');
     var message = $inputMessage.val();
-    socket.emit('chat message', {message : message, user_name : userName});
-  
+    var recip = "all";
+    // if (message.substring(0,3) === "/w ") {
+    if (message.startsWith("/w ")) {
+      var sliced = message.slice(3, message.size);
+      var first_space = sliced.indexOf(" ");
+      recip = sliced.slice(0,first_space);
+      message = sliced.slice(first_space+1,sliced.size);
+      alert('a'+recip+'a');
+      alert('a'+message+'a');
+    }
+    socket.emit('chat message', {message : message, user_name : userName, recipient : recip});
+
     if ($messages.children().last().hasClass("r-bubble-container")) {
       $('.r-bubble-container:last').append(
         $('<div class="r-bubble">').append(
@@ -130,7 +141,7 @@
   socket.on('disconnect', function(msg) {
     $messages.append($('<li>').text(msg.user_name + ' disconnected'));
     $numUsers.text(msg.num_users);
-    $('li').filter(function() {return $.text([this]) == msg.user_name;}).remove();
+    $('li').filter(function() {return $.text([this]) === msg.user_name;}).remove();
   })
 
   socket.on('new user', function(msg) {
@@ -146,7 +157,7 @@
     for (var person in msg.user_list) {
       //avoid adding your own nickname, can make this easier by disallowing duplicate usernames
       // if (msg.user_list[person].uid != '/#'+socket.io.engine.id) 
-      if (msg.user_list[person].nickName != userName)
+      if (msg.user_list[person].nickName !== userName)
         $('#users').append($('<li>').text(msg.user_list[person].nickName));
     }
   })
