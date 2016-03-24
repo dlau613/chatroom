@@ -24,6 +24,17 @@ var io = require('socket.io')(http);
 //   console.log("Started listening on %s", app.url);
 // });
 
+///////////////////////
+// var MongoClient = require('mongodb').MongoClient;
+// var assert = require('assert');
+// var url = 'mongodb://localhost:27017/test';
+// MongoClient.connect(url, function(err, db) {
+//   assert.equal(null, err);
+//   console.log("Connected correctly to server.");
+//   db.close();
+// });
+
+///////////////////////
 
 // app.get('/', function(req, res){
 //   // res.send('<h1>Hello world</h1>');
@@ -67,18 +78,32 @@ io.on('connection', function(socket){
 	    io.emit('disconnect', {num_users : numUsers, user_name : user});
 	});
 
-	socket.on('chat message', function(msg){
-    	console.log(msg.user_name + ' to ' + msg.recipient + ': ' + msg.message);
-    	if (msg.recipient === "all") {
-    		socket.broadcast.emit('chat message', { m : msg.message, user_name : msg.user_name} );
- 		}
- 		else {
- 			var recipient_id = username_to_id(msg.recipient);
- 			if (recipient_id != -1) {
- 				io.to(recipient_id).emit('chat message', {m : msg.message, user_name : msg.user_name} );
+	// socket.on('private message', function(msg) {
+	// 	console.log(msg.user_name + ' to ' + msg.recipient + ': ' + msg.message);
+	// 	var recipient_id = username_to_id(msg.recipient);
+	// 	if (recipient_id != -1) {
+	// 		io.to(recipient_id).emit('private message', {m : msg.message, user_name : msg.user_name} );
+	// 	}
+	// 	else 
+	// 		console.log("recipient does not exist");
+	// });
+
+	// socket.on('normal message', function(msg){
+ //    	console.log(msg.user_name + ' to all: ' + msg.message);
+ //    	socket.broadcast.emit('normal message', { m : msg.message, user_name : msg.user_name} );
+ // 	});
+
+ 	socket.on('message', function(msg) {
+ 		console.log(msg.m_sender + ' to ' + msg.m_receiver + ': ' + msg.m_text);
+ 		//store message in db
+ 		if (msg.m_type === 'private') {
+ 			var receiver_id = username_to_id(msg.m_receiver);
+ 			if (receiver_id != -1) {
+ 				io.to(receiver_id).emit('message', msg);
  			}
- 			else 
- 				console.log("recipient does not exist");
+ 		}
+ 		else if (msg.m_type === 'normal') {
+ 			socket.broadcast.emit('message', msg);
  		}
  	});
 
@@ -96,12 +121,6 @@ io.on('connection', function(socket){
 http.listen(port, function(){
   console.log('listening on *: '+port);
 });
-
-// http.listen(3000, function(){
-//   console.log('listening on *:3000');
-// });
-
-
 
 function username_to_id(username) {
 	for (var i=0; i < userList.length; ++i) {
