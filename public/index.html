@@ -49,21 +49,7 @@
       </ul>
     </div>
     <!-- ///////////////////////////////////////// -->
-  <!--   <ul class="pages">
-      <li class="chat page">
-        <div class="chatArea">
-          <ul class="messages"></ul>
-        </div>
-        <input class="inputMessage" placeholder="Type here..."/>
-      </li>
-      <li class="login page">
-        <div class="form">
-          <h3 class="title">What's your nickname?</h3>
-          <input class="usernameInput" type="text" maxlength="14" />
-        </div>
-      </li>
-    </ul>
-    -->
+ 
 
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
@@ -237,6 +223,13 @@
       // if (msg.user_list[person].uid != '/#'+socket.io.engine.id) 
       if (msg.user_list[person].nickName !== userName)
         $('#users').append($('<li>').text(msg.user_list[person].nickName));
+    }
+    for (var i = 0; i < msg.messages.length;++i) {
+      var new_message = new Normal_Message(msg.messages[i].message.m_sender +': ' + msg.messages[i].message.m_text);
+      new_message.m_sender = msg.messages[i].message.m_sender;
+      new_message.m_type = msg.messages[i].message.m_type;
+      new_message.m_side = 'left';
+      new_message.add();
     }
   })
 

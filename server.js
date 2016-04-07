@@ -25,14 +25,30 @@ var io = require('socket.io')(http);
 // });
 
 ///////////////////////
-// var MongoClient = require('mongodb').MongoClient;
-// var assert = require('assert');
-// var url = 'mongodb://localhost:27017/test';
+var MongoClient = require('mongodb').MongoClient;
+var assert = require('assert');
+var url = 'mongodb://localhost:27017/test';
 // MongoClient.connect(url, function(err, db) {
 //   assert.equal(null, err);
 //   console.log("Connected correctly to server.");
-//   db.close();
+//   findRestaurants(db, function() {
+//   	db.close();
+//   });
+//   // db.close();
 // });
+// var findRestaurants = function(db, callback) {
+function findRestaurants(db,callback) {
+   var cursor =db.collection('restaurants').find({ "name" : "Subway"} );
+   cursor.each(function(err, doc) {
+      assert.equal(err, null);
+      if (doc != null) {
+         console.dir(doc.name);
+      } else {
+         callback();
+      }
+   });
+};
+
 
 ///////////////////////
 
@@ -52,6 +68,14 @@ var allUsers = [];
 //stores person object which has username and socket.id
 //can pass this one as a parameter
 var userList = [];
+// MongoClient.connect(url, function(err,db) {
+// 	assert.equal(null, err);
+// 	db.collection('messages').drop(function(err,response) {
+// 		console.log(response);
+// 		db.close();
+// 	});
+// });
+
 io.on('connection', function(socket){
 	numUsers += 1;
 
@@ -66,7 +90,30 @@ io.on('connection', function(socket){
 
 	//if people are sitting at login it will count them towards numUsers, if they were at
 	//login at the same time
-	io.to(socket.id).emit('initialize', {num_users : numUsers, user_list : userList});
+	//grab 10 most recent messages to send to client
+	MongoClient.connect(url, function(err,db) {
+		assert.equal(null,err);
+		console.log("connected correctly to server");
+		// var messages;
+		var messages = load_ten_messages(db, function(data) {
+			db.close();
+			console.dir(data);
+			io.to(socket.id).emit('initialize', {num_users: numUsers, user_list: userList, messages : data});
+
+		});
+	});
+
+	// io.to(socket.id).emit('initialize', {num_users : numUsers, user_list : userList});
+
+	// MongoClient.connect(url, function(err, db) {
+	// 	assert.equal(null, err);
+	// 	console.log("Connected correctly to server.");
+	// 	var a = load_message(db, function() {
+	// 		db.close();
+	// 	});
+	// 	console.log(a);
+	// 	// db.close();
+	// });
 	
 	socket.on('disconnect', function(){
 		numUsers -= 1;
@@ -95,7 +142,18 @@ io.on('connection', function(socket){
 
  	socket.on('message', function(msg) {
  		console.log(msg.m_sender + ' to ' + msg.m_receiver + ': ' + msg.m_text);
+ 		//////////////////////////
  		//store message in db
+ 		MongoClient.connect(url, function(err, db) {
+		  assert.equal(null, err);
+		  console.log("Connected correctly to server.");
+		  store_message(db,msg, function() {
+		  	db.close();
+		  });
+		  // db.close();
+		});
+
+ 		//////////////////////
  		if (msg.m_type === 'private') {
  			var receiver_id = username_to_id(msg.m_receiver);
  			if (receiver_id != -1) {
@@ -122,6 +180,44 @@ http.listen(port, function(){
   console.log('listening on *: '+port);
 });
 
+function store_message(db, message, callback) {
+	db.collection('messages').insertOne( {
+		// "text" : message.m_text,
+		// "sender" : message.m_sender,
+		// "receiver" : message.m_receiver,
+		// "time" : message.m_time,
+		// "side" : message.m_side,
+		// "type" : message.m_type,
+		"message" : message
+	}, function(err, result) {
+	    assert.equal(err, null);
+	    console.log("Inserted a document into the messages collection.");
+	    callback();
+	});
+}
+
+function load_message(db, callback) {
+	var cursor =db.collection('messages').find( );
+	cursor.each(function(err, doc) {
+  		assert.equal(err, null);
+  		if (doc != null) {
+     		console.dir(doc.m_text);
+  		} else {
+     		callback();
+  		}
+	});
+	return 'djkafs;';
+}
+
+function load_ten_messages(db, callback) {
+	db.collection('messages', function(err,collection)	{
+		assert.equal(err,null);
+		collection.find().toArray( function(err, array)	{
+			assert.equal(err,null);
+			callback(array);
+		} )
+	});	
+}
 function username_to_id(username) {
 	for (var i=0; i < userList.length; ++i) {
 		if (userList[i].nickName === username)
@@ -129,3 +225,6 @@ function username_to_id(username) {
 	}
 	return -1;
 }
+
+
+
