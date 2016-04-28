@@ -57,72 +57,89 @@
 <script>
   /* everything added to the chat area is a message  currently there are private and normal messages. each type of message has an add function that 
   will append it to either the left or right side of the chat area. */
-  var Message = function(text) {
+  var Message = function(text, sender, receiver, time, side, type) {
     this.m_text = text;
-    this.m_sender = '';
-    this.m_receiver = '';
+    this.m_sender = sender;
+    this.m_receiver = receiver;
     this.m_time = '';
-    this.m_side = '';
-    this.m_type = 'private';
+    this.m_side = side;
+    this.m_type = type;
   };
 
   Message.prototype.add = function() {
-    alert('message type undefined');
-  };
-
-  function Private_Message(text) {
-    Message.call(this,text);
-  }
-  Private_Message.prototype = Object.create(Message.prototype);
-  Private_Message.prototype.constructor =  Private_Message;
-  Private_Message.prototype.add = function() {
+    debugger;
     if (this.m_side === 'right') {
-      if ($messages.children().last().hasClass("r-bubble-container")) {
-        add_private_to_r_container(this.m_text);
-      }
-      else {
-        add_new_r_container();
-        add_private_to_r_container(this.m_text);
-      }
+      if (this.m_type === 'normal') 
+        add_normal_to_right(this);
+      else 
+        add_private_to_right(this);
     }
-    else if (this.m_side === 'left') {
-      if ($messages.children().last().hasClass("l-bubble-container")) {
-        add_private_to_l_container(this.m_text); 
-      }
-      else {
-        add_new_l_container();
-        add_private_to_l_container(this.m_text);
-      }
+    else {
+      if (this.m_type === 'normal') 
+        add_normal_to_left(this);
+      else 
+        add_private_to_left(this);
     }
     scroll_down();
   };
 
-  function Normal_Message(text) {
-    Message.call(this,text);
-  }
-  Normal_Message.prototype = Object.create(Message.prototype);
-  Normal_Message.prototype.constructor =  Normal_Message;
-  Normal_Message.prototype.add = function() {
-    if (this.m_side === 'right') {
-      if ($messages.children().last().hasClass("r-bubble-container")) {
-        add_normal_to_r_container(this.m_text);
-      }
-      else {
-        add_new_r_container();
-        add_normal_to_r_container(this.m_text);
-      }
-    }
-    else if (this.m_side === 'left') {
-      if ($messages.children().last().hasClass("l-bubble-container")) {
-         add_normal_to_l_container(this.m_text);
-      }
-      else {
-        add_new_l_container();
-        add_normal_to_l_container(this.m_text);
-      }
-    }
-    scroll_down();
-  };
+  // function Private_Message(text) {
+  //   Message.call(this,text);
+  // }
+  // Private_Message.prototype = Object.create(Message.prototype);
+  // Private_Message.prototype.constructor =  Private_Message;
+  // Private_Message.prototype.add = function() {
+  //   if (this.m_side === 'right') {
+  //     // if ($messages.children().last().hasClass("r-bubble-container")) {
+  //     //   add_private_to_r_container(this.m_text);
+  //     // }
+  //     // else {
+  //     //   add_new_r_container();
+  //     //   add_private_to_r_container(this.m_text);
+  //     // }
+  //     add_private_to_right(this);
+  //   }
+  //   else if (this.m_side === 'left') {
+  //     // if ($messages.children().last().hasClass("l-bubble-container")) {
+  //     //   add_private_to_l_container(this.m_text); 
+  //     // }
+  //     // else {
+  //     //   add_new_l_container();
+  //     //   add_private_to_l_container(this.m_text);
+  //     // }
+  //     add_private_to_left(this);
+  //   }
+  //   scroll_down();
+  // };
+
+  // function Normal_Message(text) {
+  //   Message.call(this,text);
+  // }
+  // Normal_Message.prototype = Object.create(Message.prototype);
+  // Normal_Message.prototype.constructor =  Normal_Message;
+  // Normal_Message.prototype.add = function() {
+  //   if (this.m_side === 'right') {
+  //     // if ($messages.children().last().hasClass("r-bubble-container")) {
+  //     //   add_normal_to_r_container(this.m_text);
+  //     // }
+  //     // else {
+  //     //   add_new_r_container();
+  //     //   add_normal_to_r_container(this.m_text);
+  //     // }
+  //     add_normal_to_right(this);
+  //   }
+  //   else if (this.m_side === 'left') {
+  //     // if ($messages.children().last().hasClass("l-bubble-container")) {
+  //     //    add_normal_to_l_container(this.m_text);
+  //     // }
+  //     // else {
+  //     //   add_new_l_container();
+  //     //   add_normal_to_l_container(this.m_text);
+  //     // }
+  //     add_normal_to_left(this);
+  //   }
+  //   scroll_down();
+  // };
 
 
   // var socket = io.connect('https://floating-brushlands-72677.herokuapp.com:80?id=2');
@@ -141,20 +158,13 @@
     var message_text = $inputMessage.val();
     var new_message;
     if (message_text.startsWith("/w ")) {
-      new_message = new Private_Message(message_text);
-      new_message.m_type = 'private';
-      new_message.m_sender = userName;
       var results = parse_private_message(message_text);
-      new_message.m_receiver = results.recipient;
-      new_message.m_text = results.message;
+      new_message = new Message(results.message, userName, results.recipient, '','right', 'private');
     }
     else {
-      new_message = new Normal_Message(message_text);
-      new_message.m_type = 'normal';
-      new_message.m_sender = userName;
+      new_message = new Message(message_text, userName, '','', 'right', 'normal');
     }
     send_message(new_message);
-    new_message.m_side = 'right';
     new_message.add();
 
     $('#m').val('');
@@ -170,6 +180,7 @@
     // $messages.append($('<div class="bubble">').text('You have entered the chatroom'));
     $('#m').focus();
     socket.emit('new user', userName);
+    scroll_down();
     e.preventDefault();
   });
 
@@ -192,12 +203,7 @@
   socket.on('message', function(msg) {
     debugger;
     var new_message;
-    if (msg.m_type === 'normal') {
-      new_message = new Normal_Message(msg.m_sender + ': ' + msg.m_text);
-    }
-    else {
-      new_message = new Private_Message(msg.m_sender + ': ' + msg.m_text);
-    }
+    new_message = new Message(msg.m_text, msg.m_sender, msg.m_receiver,msg.m_time, msg.m_side, msg.m_type);
     new_message.m_side = 'left';
     new_message.add();
   });
@@ -212,6 +218,7 @@
     $messages.append($('<li>').text(msg.user_name + ' joined the chatroom'));
     $numUsers.text(msg.num_users);
     $('#users').append($('<li>').text(msg.user_name));
+    scroll_down();
   })
 
   socket.on('initialize', function(msg) {
@@ -224,11 +231,8 @@
       if (msg.user_list[person].nickName !== userName)
         $('#users').append($('<li>').text(msg.user_list[person].nickName));
     }
-    for (var i = 0; i < msg.messages.length;++i) {
-      var new_message = new Normal_Message(msg.messages[i].message.m_sender +': ' + msg.messages[i].message.m_text);
-      new_message.m_sender = msg.messages[i].message.m_sender;
-      new_message.m_type = msg.messages[i].message.m_type;
-      new_message.m_side = 'left';
+    for (var i = msg.messages.length - 1; i >= 0;--i) {
+      var new_message = new Message(msg.messages[i].message.m_text, msg.messages[i].message.m_sender, msg.messages[i].message.m_receiver, msg.messages[i].message.m_time, 'left', msg.messages[i].message.m_type);
       new_message.add();
     }
   })
@@ -240,16 +244,45 @@
     message = sliced.slice(first_space+1,sliced.size);
     return { message : message, recipient : recip}
   }
-  function send_private_message(message) {
-    socket.emit('private message', {message : message.m_text, user_name : message.m_sender, recipient : message.m_receiver});
-  }
-
-  function send_normal_message(message) {
-    socket.emit('normal message', {message : message, user_name : userName}); 
-  }
 
   function send_message(message) {
     socket.emit('message',message);
+  }
+  function add_private_to_right(message) {
+    if ($messages.children().last().hasClass("r-bubble-container")) {
+      add_private_to_r_container(message);
+    }
+    else {
+      add_new_r_container();
+      add_private_to_r_container(message);
+    }
+  }
+  function add_private_to_left(message) {
+    if ($messages.children().last().hasClass("l-bubble-container")) {
+      add_private_to_l_container(message);
+    }
+    else {
+      add_new_l_container();
+      add_private_to_l_container(message);
+    }
+  }
+  function add_normal_to_right(message) {
+    if ($messages.children().last().hasClass("r-bubble-container")) {
+      add_normal_to_r_container(message);
+    }
+    else {
+      add_new_r_container();
+      add_normal_to_r_container(message);
+    }
+  }
+  function add_normal_to_left(message) {
+    if ($messages.children().last().hasClass("l-bubble-container")) {
+      add_normal_to_l_container(message);
+    }
+    else {
+      add_new_l_container();
+      add_normal_to_l_container(message);
+    }
   }
   function add_new_l_container() {
      $messages.append(
@@ -263,22 +296,22 @@
   function add_normal_to_l_container(message) {
     $('.l-bubble-container:last').append(
           $('<div class="bubble l-bubble normal-message-received">').append(
-            message)).append('<br/>');
+            message.m_sender +': '+message.m_text)).append('<br/>');
   }
   function add_normal_to_r_container(message) {
     $('.r-bubble-container:last').append(
           $('<div class="bubble r-bubble normal-message-sent">').append(
-            message)).append('<br/>'); 
+            message.m_text)).append('<br/>'); 
   }
   function add_private_to_l_container(message) {
     $('.l-bubble-container:last').append(
           $('<div class="bubble l-bubble private-message-received">').append(
-            message)).append('<br/>');
+            message.m_sender +': '+message.m_text)).append('<br/>');
   }
   function add_private_to_r_container(message) {
     $('.r-bubble-container:last').append(
           $('<div class="bubble r-bubble private-message-sent">').append(
-            message)).append('<br/>'); 
+            message.m_text)).append('<br/>'); 
   }
   function scroll_down() {
     $('.chatArea').scrollTop($('.chatArea')[0].scrollHeight);

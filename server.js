@@ -26,8 +26,10 @@ var io = require('socket.io')(http);
 
 ///////////////////////
 var MongoClient = require('mongodb').MongoClient;
+var ObjectId = require('mongodb').ObjectID;
 var assert = require('assert');
-var url = 'mongodb://localhost:27017/test';
+// var url = 'mongodb://localhost:27017/test';
+var url = 'mongodb://heroku_08jsp5p8:61kpm9a22mm9sf1236mpkj4fqh@ds021711.mlab.com:21711/heroku_08jsp5p8';
 // MongoClient.connect(url, function(err, db) {
 //   assert.equal(null, err);
 //   console.log("Connected correctly to server.");
@@ -212,7 +214,7 @@ function load_message(db, callback) {
 function load_ten_messages(db, callback) {
 	db.collection('messages', function(err,collection)	{
 		assert.equal(err,null);
-		collection.find().toArray( function(err, array)	{
+		collection.find().sort({_id:-1}).limit(10).toArray( function(err, array)	{
 			assert.equal(err,null);
 			callback(array);
 		} )
