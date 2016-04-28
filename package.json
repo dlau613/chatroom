@@ -5,6 +5,7 @@
   "dependencies": {
     "express": "^4.10.2",
     "mongodb": "^2.1.7",
+    "mongoose": "^4.4.14",
     "socket.io": "^1.4.5"
   },
   "engines": {
